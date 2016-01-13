@@ -1,0 +1,48 @@
+function N_interface_MBI_dynamic_plot(MBI_plot_struct)
+
+y_limits=[min(min(real(MBI_plot_struct.E0_R))) max(max(real(MBI_plot_struct.E0_R)))]./MBI_plot_struct.sum_E0;
+% rectangle_bounds=[0, min(min(real(MBI_plot_struct.E0_R)))./MBI_plot_struct.sum_E0, max(MBI_plot_struct.y1.*10^3), (max(max(real(MBI_plot_struct.E0_R)))-min(min(real(MBI_plot_struct.E0_R))))./MBI_plot_struct.sum_E0;
+%     min(MBI_plot_struct.y2.*10^3), min(min(real(MBI_plot_struct.E0_R)))./MBI_plot_struct.sum_E0, max(MBI_plot_struct.y2.*10^3)-max(MBI_plot_struct.y1.*10^3), (max(max(real(MBI_plot_struct.E0_R)))-min(min(real(MBI_plot_struct.E0_R))))./MBI_plot_struct.sum_E0;
+%     min(MBI_plot_struct.y3.*10^3), min(min(real(MBI_plot_struct.E0_R)))./MBI_plot_struct.sum_E0, max(MBI_plot_struct.y3.*10^3)-max(MBI_plot_struct.y2.*10^3), (max(max(real(MBI_plot_struct.E0_R)))-min(min(real(MBI_plot_struct.E0_R))))./MBI_plot_struct.sum_E0]
+
+%default to full-screen
+scrsz = get(0,'ScreenSize');
+h=figure;
+set(h,'position',scrsz);
+for n=1:length(MBI_plot_struct.t)
+    subplot(1,2,1)
+    plot(MBI_plot_struct.y1.*10^3,real(MBI_plot_struct.E0_R(:,1,n)./MBI_plot_struct.sum_E0),'b-','linewidth',1.5);
+    hold on
+    plot(MBI_plot_struct.y2.*10^3,real(MBI_plot_struct.E0_MBI(:,1,n)./MBI_plot_struct.sum_E0),'r-','linewidth',1.5);
+    plot(MBI_plot_struct.y3.*10^3,real(MBI_plot_struct.E0_T(:,1,n)./MBI_plot_struct.sum_E0),'k-','linewidth',1.5);
+   
+    p1=patch([0, max(MBI_plot_struct.y1.*10^3), max(MBI_plot_struct.y1.*10^3), 0],[min(min(real(MBI_plot_struct.E0_R)))./MBI_plot_struct.sum_E0, min(min(real(MBI_plot_struct.E0_R)))./MBI_plot_struct.sum_E0, max(max(real(MBI_plot_struct.E0_R)))./MBI_plot_struct.sum_E0, max(max(real(MBI_plot_struct.E0_R)))./MBI_plot_struct.sum_E0],'b');  
+    p2=patch([min(MBI_plot_struct.y2.*10^3), max(MBI_plot_struct.y2.*10^3), max(MBI_plot_struct.y2.*10^3), min(MBI_plot_struct.y2.*10^3)],[min(min(real(MBI_plot_struct.E0_R)))./MBI_plot_struct.sum_E0, min(min(real(MBI_plot_struct.E0_R)))./MBI_plot_struct.sum_E0, max(max(real(MBI_plot_struct.E0_R)))./MBI_plot_struct.sum_E0, max(max(real(MBI_plot_struct.E0_R)))./MBI_plot_struct.sum_E0],'r');
+    p3=patch([min(MBI_plot_struct.y3.*10^3), max(MBI_plot_struct.y3.*10^3), max(MBI_plot_struct.y3.*10^3), min(MBI_plot_struct.y3.*10^3)],[min(min(real(MBI_plot_struct.E0_R)))./MBI_plot_struct.sum_E0, min(min(real(MBI_plot_struct.E0_R)))./MBI_plot_struct.sum_E0, max(max(real(MBI_plot_struct.E0_R)))./MBI_plot_struct.sum_E0, max(max(real(MBI_plot_struct.E0_R)))./MBI_plot_struct.sum_E0],'k');
+    set([p1,p2,p3],'facealpha',0.3);
+    
+    hold off
+    xlabel('Distance in coverslip (mm)');ylabel('Electric Field (AU)')
+    xlim(10.^3.*[min(MBI_plot_struct.y1) max(MBI_plot_struct.y3)]); ylim(y_limits)
+    title(sprintf('Time = %f ps',MBI_plot_struct.t(n).*10^12))
+    axis square    
+    
+    subplot(1,2,2)
+    var = 0 : .01 : 2 * pi;
+    P = polar(var, max(max(abs(MBI_plot_struct.E0_R)./MBI_plot_struct.sum_E0)).*ones(size(var)));
+    set(P, 'Visible', 'off')
+    hold on
+    P1=polar(angle(MBI_plot_struct.E0_R(:,1,n)),abs(MBI_plot_struct.E0_R(:,1,n)./MBI_plot_struct.sum_E0),'b-');
+    P2=polar(angle(MBI_plot_struct.E0_MBI(:,1,n)),abs(MBI_plot_struct.E0_MBI(:,1,n)./MBI_plot_struct.sum_E0),'r-');
+    P3=polar(angle(MBI_plot_struct.E0_T(:,1,n)),abs(MBI_plot_struct.E0_T(:,1,n)./MBI_plot_struct.sum_E0),'k-');
+    title('Complex Electric Field')
+    set([P1,P2,P3],'linewidth',1.5)
+    hold off   
+
+    pause(0.1)  
+
+    if ishandle(h)==0 %if plot is prematurely closed, exit code.
+        close all
+        return
+    end
+end
